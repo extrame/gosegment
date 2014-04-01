@@ -1,7 +1,6 @@
-package framework
+package gosegment
 
 import (
-	"segment/dict"
 	"sort"
 )
 
@@ -151,25 +150,25 @@ func (s *State) NextState(action rune) (nextstate int, isElseAction bool) {
 func (s *State) DoThings(action rune, dfa *Lexical) {
 	switch s.Func {
 	case OutputIdentifier:
-		dfa.OutputToken = dict.NewWordInfoDefault()
+		dfa.OutputToken = NewWordInfoDefault()
 		s.getTextElse(dfa)
-		dfa.OutputToken.WordType = dict.TEnglish
+		dfa.OutputToken.WordType = TEnglish
 	case OutputSpace:
-		dfa.OutputToken = dict.NewWordInfoDefault()
+		dfa.OutputToken = NewWordInfoDefault()
 		s.getTextElse(dfa)
-		dfa.OutputToken.WordType = dict.TSpace
+		dfa.OutputToken.WordType = TSpace
 	case OutputNumeric:
-		dfa.OutputToken = dict.NewWordInfoDefault()
+		dfa.OutputToken = NewWordInfoDefault()
 		s.getTextElse(dfa)
-		dfa.OutputToken.WordType = dict.TNumeric
+		dfa.OutputToken.WordType = TNumeric
 	case OutputChinese:
-		dfa.OutputToken = dict.NewWordInfoDefault()
+		dfa.OutputToken = NewWordInfoDefault()
 		s.getTextElse(dfa)
-		dfa.OutputToken.WordType = dict.TSimplifiedChinese
+		dfa.OutputToken.WordType = TSimplifiedChinese
 	case Other:
-		dfa.OutputToken = dict.NewWordInfoDefault()
+		dfa.OutputToken = NewWordInfoDefault()
 		s.getText(dfa)
-		dfa.OutputToken.WordType = dict.TSymbol
+		dfa.OutputToken.WordType = TSymbol
 	}
 }
 
@@ -192,7 +191,7 @@ func (s *State) getText(dfa *Lexical) {
 	dfa.beginIndex = endIndex + 1
 }
 
-// static 
+// static
 var states = []*State{}
 var EofAction rune = 0
 var s0 = addState(NewStateId(0))                        // Start state
@@ -316,7 +315,7 @@ type Lexical struct {
 
 	beginIndex  int
 	inputText   []rune
-	OutputToken *dict.WordInfo
+	OutputToken *WordInfo
 }
 
 func NewLexical(runes []rune) *Lexical {

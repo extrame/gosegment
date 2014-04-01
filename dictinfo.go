@@ -1,4 +1,4 @@
-package dict
+package gosegment
 
 const (
 	TNone              = 0
@@ -30,5 +30,5 @@ func NewWordInfoDefault() *WordInfo {
 }
 
 func NewWordInfoSome(word string, pos int, frequency float64) *WordInfo {
-    return &WordInfo{Word: word, Pos: pos, Frequency: frequency}
+	return &WordInfo{Word: word, Pos: pos, Frequency: frequency}
 }

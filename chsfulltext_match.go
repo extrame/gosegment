@@ -1,14 +1,15 @@
-package match
+package gosegment
 
 import (
 	"container/list"
-	"segment/dict"
-	"segment/utils"
+	"github.com/extrame/gosegment/dict"
+	"github.com/extrame/gosegment/match"
+	"github.com/extrame/gosegment/utils"
 	"sort"
 )
 
 type IChsFullTextMatch interface {
-	SetOptionParams(options *MatchOptions, params *MatchParameter)
+	SetOptionParams(options *match.MatchOptions, params *match.MatchParameter)
 	Match(posLenArr []dict.PositionLength, originalText string, count int) *list.List
 }
 
@@ -18,8 +19,8 @@ const (
 )
 
 type ChsFullTextMatch struct {
-	options         *MatchOptions
-	params          *MatchParameter
+	options         *match.MatchOptions
+	params          *match.MatchParameter
 	wordDict        *dict.WordDictionary
 	root            *Node
 	leafNodeList    []*Node
@@ -38,17 +39,17 @@ func NewChsFullTextMatch(wdict *dict.WordDictionary) (m *ChsFullTextMatch) {
 	return
 }
 
-func (m *ChsFullTextMatch) SetOptionParams(options *MatchOptions, params *MatchParameter) {
+func (m *ChsFullTextMatch) SetOptionParams(options *match.MatchOptions, params *match.MatchParameter) {
 	m.options = options
-	m.params = params 
+	m.params = params
 }
 
 func (m *ChsFullTextMatch) Match(posLenArr []dict.PositionLength, originalText string) *list.List {
 	if m.options == nil {
-		m.options = NewMatchOptions()
+		m.options = match.NewMatchOptions()
 	}
 	if m.params == nil {
-		m.params = NewMatchParameter()
+		m.params = match.NewMatchParameter()
 	}
 	runes := utils.ToRunes(originalText)
 	masks := make([]int, len(runes))
@@ -57,20 +58,20 @@ func (m *ChsFullTextMatch) Match(posLenArr []dict.PositionLength, originalText s
 	result := list.New()
 	if len(posLenArr) == 0 {
 		if m.options.UnknownWordIdentify {
-			wi := dict.NewWordInfoDefault()
+			wi := NewWordInfoDefault()
 			wi.Word = originalText
 			wi.Position = 0
-			wi.WordType = dict.TNone
+			wi.WordType = TNone
 			wi.Rank = 1
 			result.PushFront(wi)
 			return result
 		} else {
 			position := 0
 			for _, r := range runes {
-				wi := dict.NewWordInfoDefault()
+				wi := NewWordInfoDefault()
 				wi.Word = string(r)
 				wi.Position = position
-				wi.WordType = dict.TNone
+				wi.WordType = TNone
 				wi.Rank = 1
 				position++
 				result.PushBack(wi)
@@ -119,11 +120,11 @@ func (m *ChsFullTextMatch) Match(posLenArr []dict.PositionLength, originalText s
 		curPc := positionCollection.Front()
 		for curPc != nil {
 			pl := curPc.Value.(dict.PositionLength)
-			wi := dict.NewWordInfoDefault()
+			wi := NewWordInfoDefault()
 			wi.Word = string(runes[pl.Position:(pl.Position + pl.Length)])
 			wi.Pos = pl.WordAttri.Pos
 			wi.Frequency = pl.WordAttri.Frequency
-			wi.WordType = dict.TSimplifiedChinese
+			wi.WordType = TSimplifiedChinese
 			wi.Position = pl.Position
 			switch pl.Level {
 			case 0:
@@ -158,8 +159,8 @@ func (m *ChsFullTextMatch) Match(posLenArr []dict.PositionLength, originalText s
 		if needRemoveSingleWord && !m.options.ForceSingleWord {
 			// remove single word need be removed
 			for cur != nil {
-				if utils.RuneLen(cur.Value.(*dict.WordInfo).Word) == 1 {
-					if masks[cur.Value.(*dict.WordInfo).Position] == 11 {
+				if utils.RuneLen(cur.Value.(*WordInfo).Word) == 1 {
+					if masks[cur.Value.(*WordInfo).Position] == 11 {
 						removeItem := cur
 						cur = cur.Next()
 						result.Remove(removeItem)
@@ -173,7 +174,7 @@ func (m *ChsFullTextMatch) Match(posLenArr []dict.PositionLength, originalText s
 		cur = result.Front()
 		j = 0
 		for cur != nil {
-			if cur.Value.(*dict.WordInfo).Position >= unknownWords[j].Position {
+			if cur.Value.(*WordInfo).Position >= unknownWords[j].Position {
 				result.InsertBefore(unknownWords[j], cur)
 				j++
 				if j >= len(unknownWords) {
@@ -181,7 +182,7 @@ func (m *ChsFullTextMatch) Match(posLenArr []dict.PositionLength, originalText s
 				}
 			}
 
-			if cur.Value.(*dict.WordInfo).Position < unknownWords[j].Position {
+			if cur.Value.(*WordInfo).Position < unknownWords[j].Position {
 				cur = cur.Next()
 			}
 		}
@@ -241,17 +242,17 @@ func (m *ChsFullTextMatch) getLeafNodeArrayCore(posLenArr []dict.PositionLength,
 	m.leafNodeList = [](*Node){}
 	m.posLenArr = posLenArr
 	m.inputStringLen = orginalTextLength
-	m.buildTree(m.root, 0)	
+	m.buildTree(m.root, 0)
 	return m.leafNodeList
 }
 
 func (m *ChsFullTextMatch) combineNodeAttr(result []*Node, arr []*Node) {
-    c := len(result) - len(arr)
-    if c > 0 {
-       for i := 0; i < c; i++ {
-          arr = append(arr, nil)
-       }
-    }
+	c := len(result) - len(arr)
+	if c > 0 {
+		for i := 0; i < c; i++ {
+			arr = append(arr, nil)
+		}
+	}
 
 	// 复制 arr 链表
 	for i := 0; i < len(arr); i++ {
@@ -381,8 +382,8 @@ loop:
 	return result
 }
 
-func (m *ChsFullTextMatch) getUnknownWords(masks []int, orginalText []rune) (unknownWords []*dict.WordInfo, needRemoveSingleWord bool) {
-	unknownWords = [](*dict.WordInfo){}
+func (m *ChsFullTextMatch) getUnknownWords(masks []int, orginalText []rune) (unknownWords []*WordInfo, needRemoveSingleWord bool) {
+	unknownWords = [](*WordInfo){}
 
 	// 找到所有未登录词
 	needRemoveSingleWord = false
@@ -405,10 +406,10 @@ func (m *ChsFullTextMatch) getUnknownWords(masks []int, orginalText []rune) (unk
 							mergeUnknownWord = false
 							if masks[k] != 1 {
 								word := string(orginalText[k : k+1])
-								wi := dict.NewWordInfoDefault()
+								wi := NewWordInfoDefault()
 								wi.Word = word
 								wi.Position = k
-								wi.WordType = dict.TNone
+								wi.WordType = TNone
 								wi.Rank = m.params.UnknowRank
 								unknownWords = append(unknownWords, wi)
 							}
@@ -426,10 +427,10 @@ func (m *ChsFullTextMatch) getUnknownWords(masks []int, orginalText []rune) (unk
 
 					if mergeUnknownWord {
 						word := string(orginalText[beginPosition:j])
-						wi := dict.NewWordInfoDefault()
+						wi := NewWordInfoDefault()
 						wi.Word = word
 						wi.Position = beginPosition
-						wi.WordType = dict.TNone
+						wi.WordType = TNone
 						wi.Rank = m.params.UnknowRank
 						unknownWords = append(unknownWords, wi)
 					}
@@ -437,10 +438,10 @@ func (m *ChsFullTextMatch) getUnknownWords(masks []int, orginalText []rune) (unk
 			}
 		} else {
 			if m.isKnownSingleWord(masks, j, orginalText) {
-				wi := dict.NewWordInfoDefault()
+				wi := NewWordInfoDefault()
 				wi.Word = string(orginalText[j])
 				wi.Position = j
-				wi.WordType = dict.TNone
+				wi.WordType = TNone
 				wi.Rank = m.params.UnknowRank
 				unknownWords = append(unknownWords, wi)
 			}
@@ -456,10 +457,10 @@ func (m *ChsFullTextMatch) getUnknownWords(masks []int, orginalText []rune) (unk
 				mergeUnknownWord = false
 				if masks[k] != 1 {
 					word := string(orginalText[k:(k + 1)])
-					wi := dict.NewWordInfoDefault()
+					wi := NewWordInfoDefault()
 					wi.Word = word
 					wi.Position = k
-					wi.WordType = dict.TNone
+					wi.WordType = TNone
 					wi.Rank = m.params.UnknowRank
 					unknownWords = append(unknownWords, wi)
 				}
@@ -477,10 +478,10 @@ func (m *ChsFullTextMatch) getUnknownWords(masks []int, orginalText []rune) (unk
 
 		if mergeUnknownWord {
 			word := string(orginalText[beginPosition:j])
-			wi := dict.NewWordInfoDefault()
+			wi := NewWordInfoDefault()
 			wi.Word = word
 			wi.Position = beginPosition
-			wi.WordType = dict.TNone
+			wi.WordType = TNone
 			wi.Rank = m.params.UnknowRank
 			unknownWords = append(unknownWords, wi)
 		}
@@ -600,7 +601,7 @@ func (m *ChsFullTextMatch) buildTree(parent *Node, curIndex int) {
 	if len(m.leafNodeList) > 8192 {
 		return
 	}
- 
+
 	if curIndex < len(m.posLenArr)-1 {
 		if m.posLenArr[curIndex+1].Position == m.posLenArr[curIndex].Position {
 			m.buildTree(parent, curIndex+1)

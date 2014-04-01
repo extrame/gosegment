@@ -2,7 +2,7 @@ package dict
 
 import (
 	"container/list"
-	"segment/utils"
+	"github.com/extrame/gosegment/utils"
 	"strconv"
 	"strings"
 )
@@ -189,6 +189,6 @@ func (d *WordDictionary) GetAllMatchs(text string, chineseNameIdentify bool) (re
 			}
 		}
 	}
-	
+
 	return
 }
