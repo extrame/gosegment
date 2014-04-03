@@ -2,6 +2,7 @@ package gosegment
 
 import (
 	"container/list"
+	"github.com/extrame/gosegment/config"
 	"github.com/extrame/gosegment/dict"
 	"github.com/extrame/gosegment/framework"
 	"github.com/extrame/gosegment/match"
@@ -12,6 +13,12 @@ import (
 )
 
 const PATTERNS = `([０-９\d]+)|([ａ-ｚＡ-Ｚa-zA-Z_]+)`
+
+func NewSegment() (seg *Segment, err error) {
+	seg = &Segment{}
+	err = seg.Init(config.Config.DictDir)
+	return
+}
 
 type Segment struct {
 	options        *match.MatchOptions
