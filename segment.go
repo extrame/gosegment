@@ -16,7 +16,7 @@ const PATTERNS = `([０-９\d]+)|([ａ-ｚＡ-Ｚa-zA-Z_]+)`
 
 func NewSegment() (seg *Segment, err error) {
 	seg = &Segment{}
-	err = seg.Init(config.Config.DictDir)
+	err = seg.Init(config.Config.DictDir())
 	return
 }
 
