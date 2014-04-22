@@ -7,6 +7,7 @@ import (
 	"github.com/extrame/gosegment/framework"
 	"github.com/extrame/gosegment/match"
 	"github.com/extrame/gosegment/utils"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"unicode"
@@ -33,7 +34,7 @@ type Segment struct {
 
 func (s *Segment) Init(dictPath string) (err error) {
 	s.re = regexp.MustCompile(PATTERNS)
-	err = s.loadVerbTable(dictPath + "/Verbtable.txt")
+	err = s.loadVerbTable(filepath.Join(dictPath, "Verbtable.txt"))
 	if err == nil {
 		err = s.loadDictionary(dictPath)
 	}
@@ -57,7 +58,7 @@ func (s *Segment) loadVerbTable(file string) (err error) {
 
 func (s *Segment) loadDictionary(dictPath string) (err error) {
 	s.wordDictionary = dict.NewWordDictionary()
-	err = s.wordDictionary.Load(dictPath + "/Dict.txt")
+	err = s.wordDictionary.Load(filepath.Join(dictPath, "Dict.txt"))
 	if err == nil {
 		s.chsName = dict.NewChsName()
 		s.wordDictionary.ChineseName = s.chsName
@@ -65,7 +66,7 @@ func (s *Segment) loadDictionary(dictPath string) (err error) {
 	}
 	if err == nil {
 		s.stopWord = dict.NewStopWord()
-		err = s.stopWord.Load(dictPath + "/Stopword.txt")
+		err = s.stopWord.Load(filepath.Join(dictPath, "Stopword.txt"))
 	}
 	if err == nil {
 		s.synonym = dict.NewSynonym()
